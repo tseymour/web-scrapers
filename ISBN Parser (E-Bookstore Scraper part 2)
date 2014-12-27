@@ -1,0 +1,47 @@
+####import string
+####isbn_location = []
+####x = 'horsedick sucksalot bullshit ISBN:1565478966548 bullshit buffer ISBN:1234567891123 plus horseshit'
+####y = string.find(x, 'ISBN:')
+####isbn_location.append(y+5)
+####isbn_location.append(y+18)
+####start = isbn_location[0]
+####finish = isbn_location[1]
+####print x[start:finish]
+
+##index =  y
+
+
+####import re
+####isbn_location = []
+####x = 'asdfasdfasdfsadf bullshit ISBN:1565478966548 bullshit buffer ISBN:1234567891123 plus horseshit'
+####for isbn_prim in re.finditer('ISBN:', x):
+####    print isbn_prim
+####
+####isbn_location.append(isbn_prim+5)
+####isbn_location.append(isbn_prim+18)
+####start = isbn_location[0]
+####finish = isbn_location[1]
+####print x[start:finish]
+
+
+
+
+import re
+isbn_location_start = []
+isbn_location_end = []
+x = 'aISBN:1565478966548 bullshISBN:5646589789321it buffer ISBN:1234567891123  ISBN:4455667788990 plus horseshit'
+raw_source = x
+w = 0
+q = 0
+z = []
+occurances = x.count('ISBN:')
+while w <= occurances:
+    for isbn in list(re.finditer('ISBN:', raw_source)):
+        isbn_location_start.append(isbn.start()+5)
+    for isbn in list(re.finditer('ISBN:', raw_source)):
+        isbn_location_end.append(isbn.end()+13)
+    z.append(x[isbn_location_start[w]:isbn_location_end[q]])
+    w = w + 1
+    q = q + 1
+print z
+
