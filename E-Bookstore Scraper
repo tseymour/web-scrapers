@@ -1,0 +1,23 @@
+# bookstore.py, slightly modified by JL
+
+import urllib
+
+
+##building my url
+bookstore = 'http://www.bkstr.com/webapp/wcs/stores/servlet/booklookServlet%20?bookstore_id-1=039&term_id-1=201209&section-1='
+
+# First CRN to use
+x = 9400
+
+##downloading all courses
+while x <= 9450:  ##change to 10000 later....I'm not sure why it won't work when the operator is < instead of >....
+    crn = str(x) # (Variables, as you noticed, don't "monitor" themselves.)
+    html = urllib.urlopen(bookstore + crn)
+    page = html.read() # read() returns a giant string. Save it as 'page'
+    print 'Downloading... ' + crn 
+    outfile = open('/tmp/' + crn + '.txt', 'w') # change the directory to whatever you want, of course
+    outfile.write(page)  # write the giant string to the file
+    html.close() # notice that 'close' is a function, so you need the parentheses here
+    outfile.close() # and here
+    x = x + 1
+ 
