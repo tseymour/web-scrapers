@@ -1,0 +1,391 @@
+/*
+ * File: Boggle.cpp
+ * ----------------
+ * Name: Tyler R. Seymour
+ * 
+ * 
+ */
+ 
+#include <iostream>
+#include <ctime>
+#include "gboggle.h"
+#include "grid.h"
+#include "lexicon.h"
+#include "point.h"
+#include "random.h"
+#include "simpio.h"
+#include "vector.h"
+#include "strlib.h"
+#include "set.h"
+#include <string>
+
+using namespace std;
+
+/* Constants */
+
+const int BOGGLE_WINDOW_WIDTH = 650;
+const int BOGGLE_WINDOW_HEIGHT = 350;
+const int CONSOLE_WIDTH = 650;
+const int CONSOLE_HEIGHT = 250;
+
+const string STANDARD_CUBES[16]  = {
+   "AAEEGN", "ABBJOO", "ACHOPS", "AFFKPS",
+   "AOOTTW", "CIMOTU", "DEILRX", "DELRVY",
+   "DISTTY", "EEGHNW", "EEINSU", "EHRTVW",
+   "EIOSST", "ELRTTY", "HIMNQU", "HLNNRZ"
+};
+ 
+const string BIG_BOGGLE_CUBES[25]  = {
+   "AAAFRS", "AAEEEE", "AAFIRS", "ADENNN", "AEEEEM",
+   "AEEGMU", "AEGMNN", "AFIRSY", "BJKQXZ", "CCNSTW",
+   "CEIILT", "CEILPT", "CEIPST", "DDLNOR", "DDHNOT",
+   "DHHLOR", "DHLNOR", "EIIITT", "EMOTTT", "ENSSSU",
+   "FIPRSY", "GORRVW", "HIPRRY", "NOOTUW", "OOOTTU"
+};
+
+/* Function prototypes */
+
+struct adjContainer {
+	char value;
+	int row;
+	int col;
+};
+
+void welcome();
+void giveInstructions();
+
+//step 1
+char rollIndvCube(int cubeIndex);
+Vector<char> rollAllCubes();
+Vector<char> manualSetUp();
+void shuffle(Vector<char> vec);
+Vector<string> findAllWords(Grid<char> & board, Lexicon & englishWords);
+Vector<adjContainer> findAdjacents(int col, int row, Grid<char> & board);
+
+bool alreadyEntered(string word, Vector<string> & enteredWords);
+bool tooShort(string word);
+bool InDict(string word);
+void humanTurn();
+
+// add additional prototypes for your functions here
+
+Lexicon englishWords("EnglishWords.dat");
+Grid<char> gameboard(4,4);
+
+char rollIndvCube(int cubeIndex) {
+
+	int randRoll = randomInteger(0,5);
+	string z = STANDARD_CUBES[cubeIndex]; //standard_cube only
+	char roll = z[randRoll];
+
+	return roll;
+}
+
+Vector<char> rollAllCubes() {
+
+	Vector<char> vec;
+	for (int i= 0; i < 16; i++) { //standard_cube only
+		vec.add(rollIndvCube(i));
+	}
+
+	return vec;
+}
+
+Vector<char> manualSetUp() {
+	Vector<char> vec;
+	string x = getLine("Enter manual set-up: ");
+
+	for (int i=0; i < x.length(); i++) {
+		vec.add(x[i]);}
+
+	return vec;
+}
+
+void shuffle(Vector<char> vec) {
+
+	for (int i=0; i < vec.size(); i++) {
+		int r = randomInteger(i, vec.size() - 1);
+		char buffer = vec[i];
+		vec[i] = vec[r];
+		vec[r] = buffer;
+	}
+
+	//how to iterate over vector and grid simultaneously?
+
+	for (int i=0; i<4; i++) {
+		gameboard.set(0, i, vec[i]);
+		labelCube(0,i,vec[i]);
+	}
+
+	for (int i=0; i<4; i++) {
+		gameboard.set(1, i, vec[i+4]);
+		labelCube(1, i, vec[i+4]);
+	}
+
+	for (int i=0; i<4; i++) {
+		gameboard.set(2, i, vec[i+8]);
+		labelCube(2, i, vec[i+8]);
+	}
+
+	for (int i=0; i<4; i++) {
+		gameboard.set(3, i, vec[i+12]);
+		labelCube(3, i, vec[i+12]);
+	}
+}
+
+
+//Grid<string> shuffleIntoGrid(Vector<string> vec) {//INCORRECT
+//	Grid<string> gameboard(4,4); //standard_cube only!
+//	
+//	foreach (string letter in vec) {
+//		while (1) {
+//		int randomx = randomInteger(0,3);
+//		int randomy = randomInteger(0,3);
+//		if (gameboard.get(randomx, randomy) == "") {gameboard.set(randomx, randomy, letter); break;}
+//		}
+//	}
+//	return gameboard;
+//
+/* Main program */
+
+
+
+
+//step 2
+
+bool alreadyEntered(string word, Vector<string> & enteredWords) { //return false if invalid word
+	foreach (string x in enteredWords) {
+		if (x == word) {return false;}}
+	return true;
+}
+
+bool tooShort(string word) {//return false if invalid
+	if (word.length() < 4) {return false;}
+	return true;
+}
+
+bool InDict(string word){//return false if invalid
+	return englishWords.contains(word);
+}
+
+Vector<string> findAllWords(Grid<char> & board, Lexicon & englishWords){
+
+	Vector<string> wordsFound;
+
+	return wordsFound;
+
+}
+
+Vector<adjContainer> findAdjacents(int col, int row, Grid<char> & gameboard) {
+	Vector<adjContainer> adjs;
+
+	//north
+	if (gameboard.inBounds(row, col + 1)) {
+
+	adjContainer north;
+	north.value = gameboard.get(row, col + 1);
+	north.col = col + 1;
+	north.row = row;
+
+	adjs.add(north);
+
+	}
+
+	//south
+	if (gameboard.inBounds(row, col - 1)){
+
+	adjContainer south;
+	south.value = gameboard.get(row, col - 1);
+	south.col = col -1;
+	south.row = row;
+
+	adjs.add(south);
+
+	}
+
+	//east
+	if (gameboard.inBounds(row + 1, col)){
+	
+	adjContainer east;
+	east.value = gameboard.get(row + 1, col);
+	east.col = col;
+	east.row = row + 1;
+
+	adjs.add(east);
+
+	}
+
+	//west
+	if (gameboard.inBounds(row - 1, col)){
+
+	adjContainer west;
+	west.value = gameboard.get(row - 1, col);
+	west.col = col;
+	west.row = row - 1;
+
+	adjs.add(west);
+
+	}
+
+	//northwest
+	if (gameboard.inBounds(row - 1, col + 1)){
+
+	adjContainer nwest;
+	nwest.value = gameboard.get(row - 1, col + 1);
+	nwest.col = col + 1;
+	nwest.row = row - 1;
+
+	adjs.add(nwest);
+
+	}
+	
+	//northeast
+	if (gameboard.inBounds(row + 1, col + 1)){
+
+	adjContainer neast;
+	neast.value = gameboard.get(row + 1, col + 1);
+	neast.col = col + 1;
+	neast.row = row + 1;
+
+	adjs.add(neast);
+
+	}
+
+	//southwest
+	if (gameboard.inBounds(row - 1, col - 1)){
+
+	adjContainer swest;
+	swest.value = gameboard.get(row - 1, col - 1);
+	swest.col = col - 1;
+	swest.row = row - 1;
+
+	adjs.add(swest);
+
+	}
+
+	//southeast
+	if (gameboard.inBounds(row + 1, col - 1)){
+
+	adjContainer seast;
+	seast.value = gameboard.get(row + 1, col - 1);
+	seast.col = col - 1;
+	seast.row = row + 1;
+
+	adjs.add(seast);
+	}
+
+	
+	return adjs;
+
+}
+
+
+
+
+void humanTurn(){
+
+	Vector<string> enteredWords;
+
+	while (1) {
+		string entered = getLine("Enter a word (-1 to quit!): ");
+
+		if (entered == "-1") break;
+
+		if (alreadyEntered(entered, enteredWords)) {
+			if (tooShort(entered)){
+				if (InDict(entered)){
+					enteredWords.add(entered);
+					recordWordForPlayer(entered, HUMAN);}}}
+	}
+	}
+
+//	}
+//	if (alreadyEntred(word, enteredWords)) {
+//		if (tooShort(word)) {
+//			if (notInDict(word)){
+//				recordWordForPlayer(word, Player player)
+//			}}}
+
+//void computerTurn() {}
+
+
+int main() {
+	//Lexicon englishWords("EnglishWords.dat");
+	//Lexicon humanWords;
+
+	setConsoleSize(CONSOLE_WIDTH, CONSOLE_HEIGHT);
+	GWindow gw(BOGGLE_WINDOW_WIDTH, BOGGLE_WINDOW_HEIGHT);
+	initGBoggle(gw);
+	// Seed the random number generator so we get a different sequence of random 
+	// numbers each time the program runs.
+	setRandomSeed((int)time(NULL)); 
+	                                
+	welcome();
+	giveInstructions();
+
+	drawBoard(4,4); //draw blank board!
+	shuffle(rollAllCubes());
+	humanTurn();
+	
+	////adjacent test  ->
+	//Vector<adjContainer> zzz = findAdjacents(1,3,gameboard); //tests to see if my adjacents work
+
+	//for (int i=0; i<zzz.size(); i++) {
+	//	cout << zzz[i].value << endl;
+	//}
+
+	getLine("Thanks for playing! Hit ENTER to quit.");
+	exitGraphics();
+	return 0;
+}
+
+
+/*
+* Function: welcome
+* Usage: welcome();
+* -----------------
+* Print out a cheery welcome message.
+*/
+
+void welcome() {
+	cout << "Welcome!  You're about to play an intense game ";
+	cout << "of mind-numbing Boggle.  The good news is that ";
+	cout << "you might improve your vocabulary a bit.  The ";
+	cout << "bad news is that you're probably going to lose ";
+	cout << "miserably to this little dictionary-toting hunk ";
+	cout << "of silicon.  If only YOU had a gig of RAM..." << endl << endl;
+}
+
+/*
+* Function: giveInstructions
+* Usage: giveInstructions();
+* --------------------------
+* Print out the instructions for the user.
+*/
+
+void giveInstructions() {
+	cout << endl;
+	cout << "The boggle board is a grid onto which I ";
+	cout << "I will randomly distribute cubes. These ";
+	cout << "6-sided cubes have letters rather than ";
+	cout << "numbers on the faces, creating a grid of ";
+	cout << "letters on which you try to form words. ";
+	cout << "You go first, entering all the words you can ";
+	cout << "find that are formed by tracing adjoining ";
+	cout << "letters. Two letters adjoin if they are next ";
+	cout << "to each other horizontally, vertically, or ";
+	cout << "diagonally. A letter can only be used once ";
+	cout << "in each word. Words must be at least four ";
+	cout << "letters long and can be counted only once. ";
+	cout << "You score points based on word length: a ";
+	cout << "4-letter word is worth 1 point, 5-letters ";
+	cout << "earn 2 points, and so on. After your puny ";
+	cout << "brain is exhausted, I, the supercomputer, ";
+	cout << "will find all the remaining words and double ";
+	cout << "or triple your paltry score." << endl << endl;
+	cout << "Hit return when you're ready...";
+	getLine();
+}
+
+
+// You'll need to write some functions here!
