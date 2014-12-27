@@ -1,0 +1,71 @@
+from BeautifulSoup import BeautifulSoup
+import urllib
+import re
+
+# url constructor for search
+pass
+pass
+pass
+
+print 'Use quotes around your search!'
+print 'For example, "iphone 5"'
+search = raw_input('Which kind of phone?') ##use + operator for now (i.e. iphone+4)
+y = "http://losangeles.craigslist.org/search/moa?query=" + search + "+-%22buy%22+-%22fix%22+-%22unlock%22+-%22broken%22+-%22cracked%22+-%22parts%22&srchType=T&minAsk=&maxAsk="
+
+# read the site into a string
+site = urllib.urlopen(y)
+html = site.read()
+site.close()
+soup = BeautifulSoup(html)
+
+
+
+#Price
+prices = soup.findAll("span", {"class":"itempp"})
+prices = [str(j).strip('<span class="itempp"> $</span>') for j in prices]
+
+for k in prices[:]:
+    if k == '': #left price blank
+        prices.remove(k)
+    elif int(k) <= 50: #less than $50: probably a service (or not true)
+        prices.remove(k)
+    elif int(k) >= 999: #probably not true
+        prices.remove(k)
+
+print prices
+print len(prices)
+
+
+#Find Average Price
+intprices = []
+newprices = prices[:]
+total = 0
+for k in newprices:
+    total += int(k)
+    intprices.append(int(k))
+
+intprices = sorted(intprices)
+
+del intprices[0]
+del intprices[-1]
+
+avg = total/len(newprices)
+low = intprices[0]
+high = intprices[-1]
+
+if len(intprices) % 2 == 1:
+    median = intprices[(len(intprices)+1)/2-1]
+else:
+    lower = intprices[len(intprices)/2-1]
+    upper = intprices[len(intprices)/2]
+    median = (float(lower + upper)) / 2  
+
+
+
+print intprices
+
+
+print "Median: $" + str(median)
+print "Average: $" + str(avg)
+print "Low: $" + str(intprices[0])
+print "High: $" + str(intprices[-1])
