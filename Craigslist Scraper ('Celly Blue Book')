@@ -18,7 +18,7 @@ html = site.read()
 site.close()
 soup = BeautifulSoup(html)
 
-
+# BEBA3204D9187F9B6253E88BE3BDD965533CE69F
 
 #Price
 prices = soup.findAll("span", {"class":"itempp"})
